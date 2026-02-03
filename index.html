@@ -71,10 +71,11 @@
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSi1bISVEXcozetKBccCL7yKkzkQCIF5FV1U2zL2P8UiHAaRcePz3TqtAaLqOqWypzQfFW3wDt0RAoZ/pub?output=csv';
 
         let fullData = [], filteredQ = [], userAnswers = [], currentIndex = 0, timer, timeLeft = 60;
+        const letterToNum = { 'a': '1', 'b': '2', 'c': '3', 'd': '4', 'e': '5' };
+        const numToLetter = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '5': 'E' };
 
         function checkPass() {
-            const passInput = document.getElementById('sitePass').value;
-            if(passInput === MY_PASSWORD) {
+            if(document.getElementById('sitePass').value === MY_PASSWORD) {
                 document.getElementById('passwordOverlay').classList.add('hidden-all');
                 document.getElementById('mainContent').classList.remove('hidden-all');
                 loadData();
@@ -85,9 +86,7 @@
 
         function loadData() {
             Papa.parse(SHEET_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
+                download: true, header: true, skipEmptyLines: true,
                 complete: (results) => {
                     fullData = results.data.filter(row => row.Question && row.Question.trim() !== "");
                     const subjects = [...new Set(fullData.map(r => r.Subject))].filter(Boolean);
@@ -96,8 +95,7 @@
                     subjects.forEach(s => mainSelect.innerHTML += `<option value="${s}">${s}</option>`);
                     document.getElementById('loader').classList.add('hidden-all');
                     document.getElementById('selectionForm').classList.remove('hidden');
-                },
-                error: (err) => alert("Data load nahi ho paya.")
+                }
             });
         }
 
@@ -119,10 +117,7 @@
             const s = document.getElementById('mainSubject').value;
             const sp = document.getElementById('subPart').value;
             if(!s) { alert("Pehle Subject chunein!"); return; }
-
-            filteredQ = fullData.filter(r => r.Subject === s && (sp === "" || r['Sub-Subject'] === sp));
-            filteredQ.sort(() => Math.random() - 0.5); // Question Shuffle
-            
+            filteredQ = fullData.filter(r => r.Subject === s && (sp === "" || r['Sub-Subject'] === sp)).sort(() => Math.random() - 0.5);
             userAnswers = new Array(filteredQ.length).fill("unattempted");
             currentIndex = 0;
             document.getElementById('loginSection').classList.add('hidden-all');
@@ -132,7 +127,6 @@
 
         function showQuestion() {
             if(currentIndex >= filteredQ.length) return endTest();
-            
             clearInterval(timer);
             timeLeft = 60;
             document.getElementById('timerDisplay').innerText = `${timeLeft}s`;
@@ -141,27 +135,18 @@
             const q = filteredQ[currentIndex];
             const container = document.getElementById('questionBox');
 
-            // --- 5 OPTIONS & SHUFFLE LOGIC ---
-            let allOptions = [
-                { id: '1', text: q['Option A'] },
-                { id: '2', text: q['Option B'] },
-                { id: '3', text: q['Option C'] },
-                { id: '4', text: q['Option D'] },
+            let opts = [
+                { id: '1', text: q['Option A'] }, { id: '2', text: q['Option B'] },
+                { id: '3', text: q['Option C'] }, { id: '4', text: q['Option D'] },
                 { id: '5', text: q['Option E'] }
-            ];
+            ].filter(o => o.text && o.text.trim() !== "").sort(() => Math.random() - 0.5);
 
-            // Sirf wahi options dikhayenge jinme text hai
-            let availableOptions = allOptions.filter(o => o.text && o.text.trim() !== "");
-            availableOptions.sort(() => Math.random() - 0.5); // Option Shuffle
-
-            const labels = ['A', 'B', 'C', 'D', 'E'];
-            
-            container.innerHTML = `
-                <p class="font-bold text-lg mb-6 text-slate-800 leading-snug">${q.Question}</p>
+            const displayLabels = ['A', 'B', 'C', 'D', 'E'];
+            container.innerHTML = `<p class="font-bold text-lg mb-6 text-slate-800">${q.Question}</p>
                 <div class="grid gap-3 text-left">
-                    ${availableOptions.map((opt, i) => `
+                    ${opts.map((opt, i) => `
                         <button onclick="selectOption('${opt.id}', this)" class="text-left p-4 border-2 rounded-xl border-slate-200 font-medium active:bg-blue-100 option-btn flex items-center group transition-all">
-                            <span class="inline-block w-8 h-8 text-center leading-8 bg-slate-100 rounded-full mr-4 text-sm font-bold group-active:bg-blue-600 group-active:text-white">${labels[i]}</span>
+                            <span class="inline-block w-8 h-8 text-center leading-8 bg-slate-100 rounded-full mr-4 text-sm font-bold group-active:bg-blue-600 group-active:text-white">${displayLabels[i]}</span>
                             <span class="flex-1">${opt.text}</span>
                         </button>`).join('')}
                 </div>`;
@@ -179,12 +164,7 @@
             setTimeout(() => { currentIndex++; showQuestion(); }, 250);
         }
 
-        function skipQuestion() {
-            userAnswers[currentIndex] = "skipped";
-            currentIndex++;
-            showQuestion();
-        }
-
+        function skipQuestion() { userAnswers[currentIndex] = "skipped"; currentIndex++; showQuestion(); }
         function confirmSubmit() { if(confirm("Submit Test?")) endTest(); }
 
         function endTest() {
@@ -197,30 +177,44 @@
 
             filteredQ.forEach((q, i) => {
                 const ans = userAnswers[i];
-                let status = (ans == q.Answer) ? "CORRECT" : (ans == "skipped" ? "SKIPPED" : (ans == "unattempted" ? "UNATTEMPTED" : "WRONG"));
-                if(status == "CORRECT") correct++;
-                else if(status == "WRONG") wrong++;
-                else if(status == "SKIPPED") skipped++;
-                else unseen++;
-                resultsList.push({ q, ans, status, originalNum: i + 1 });
-            });
+                let sheetAnsRaw = q.Answer.toLowerCase().trim();
+                let isCorrect = false;
 
-            // Wrong answers first in review
-            resultsList.sort((a, b) => {
-                const p = { "WRONG": 0, "UNATTEMPTED": 1, "SKIPPED": 2, "CORRECT": 3 };
-                return p[a.status] - p[b.status];
+                // Checking if it's a standard single option (a, b, c, d, e)
+                const isStandardOption = /^[a-e]$/.test(sheetAnsRaw);
+
+                if (isStandardOption) {
+                    isCorrect = (ans === letterToNum[sheetAnsRaw]);
+                } else {
+                    // Logic for anything else (multiple answers or special text)
+                    // If user's selected answer is part of the special criteria (e.g., "a & b")
+                    let possibleMatches = sheetAnsRaw.match(/[a-e]/g) || [];
+                    let correctNums = possibleMatches.map(char => letterToNum[char]);
+                    isCorrect = correctNums.includes(ans);
+                }
+
+                let status = isCorrect ? "CORRECT" : (ans == "skipped" ? "SKIPPED" : (ans == "unattempted" ? "UNATTEMPTED" : "WRONG"));
+                if(status == "CORRECT") correct++; else if(status == "WRONG") wrong++; else if(status == "SKIPPED") skipped++; else unseen++;
+                resultsList.push({ q, ans, status, originalNum: i + 1, sheetAnsRaw, isStandardOption });
             });
 
             const reviewContainer = document.getElementById('reviewList');
             reviewContainer.innerHTML = "";
 
-            resultsList.forEach(item => {
-                const { q, ans, status, originalNum } = item;
+            resultsList.sort((a,b) => (a.status === "WRONG" ? -1 : 1)).forEach(item => {
+                const { q, ans, status, originalNum, sheetAnsRaw, isStandardOption } = item;
                 let borderColor = status == "CORRECT" ? "border-green-500" : (status == "WRONG" ? "border-red-500" : "border-slate-300");
-                const optKeys = ['Option A', 'Option B', 'Option C', 'Option D', 'Option E'];
                 
-                const correctText = q[optKeys[parseInt(q.Answer) - 1]];
-                const userText = (ans != "skipped" && ans != "unattempted") ? q[optKeys[parseInt(ans) - 1]] : "Attempt nahi kiya";
+                // If it's not a standard single option, show "Check Explanation"
+                let correctDisplay = "";
+                if (!isStandardOption) {
+                    correctDisplay = "<span class='text-orange-600 font-bold'>Check Explanation</span>";
+                } else {
+                    let letter = sheetAnsRaw.toUpperCase();
+                    correctDisplay = q['Option ' + letter];
+                }
+
+                let userDisplay = (ans != "skipped" && ans != "unattempted") ? q['Option ' + numToLetter[ans]] : "Attempt nahi kiya";
 
                 reviewContainer.innerHTML += `
                     <div class="bg-white p-5 rounded-2xl border-l-8 ${borderColor} shadow-md mb-4 text-left">
@@ -230,12 +224,11 @@
                         </div>
                         <p class="font-bold text-slate-800 mb-4">${q.Question}</p>
                         <div class="grid gap-2 mb-4 text-sm">
-                            <div class="p-2 border rounded bg-green-50 border-green-200"><strong>Sahi Uttar:</strong> ${correctText}</div>
-                            ${status === 'WRONG' ? `<div class="p-2 border rounded bg-red-50 border-red-200"><strong>Aapka Uttar:</strong> ${userText}</div>` : ''}
+                            <div class="p-2 border rounded bg-green-50 border-green-200"><strong>Sahi Uttar:</strong> ${correctDisplay}</div>
+                            ${status === 'WRONG' ? `<div class="p-2 border rounded bg-red-50 border-red-200"><strong>Aapka Uttar:</strong> ${userDisplay}</div>` : ''}
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl text-xs text-slate-600">
-                            <strong class="text-slate-800 block mb-1">Vyakhya:</strong>
-                            ${q.Explanation || 'No explanation available.'}
+                            <strong class="text-slate-800 block mb-1 underline">Vyakhya:</strong> ${q.Explanation || 'No explanation.'}
                         </div>
                     </div>`;
             });
