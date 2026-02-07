@@ -157,46 +157,30 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-    <!-- ==================== SETUP SECTION ==================== -->
-    <div id="setupSection" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
-            <!-- Header -->
-            <div class="nta-blue text-white p-6 text-center">
-                <h1 class="text-2xl font-bold"><i class="fas fa-graduation-cap mr-2"></i>NTA Mock Test</h1>
-                <p class="text-blue-200 mt-1">Practice Examination Portal</p>
+    <!-- ==================== PASSWORD OVERLAY ==================== -->
+    <div id="passwordOverlay" class="fixed inset-0 bg-blue-900 flex items-center justify-center z-[100]">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-sm text-center">
+            <div class="mb-4">
+                <i class="fas fa-lock text-5xl text-blue-600"></i>
             </div>
-            
-            <div class="p-6 space-y-4">
-                <!-- Google Sheet URL Input -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-link mr-2 text-blue-600"></i>Google Sheet CSV Link
-                    </label>
-                    <textarea id="sheetUrl" rows="3" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-sm" placeholder="Paste your Google Sheet CSV link here..."></textarea>
-                    <p class="text-xs text-gray-500 mt-1">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Sheet must have: Question, Option A/B/C/D, Answer, Explanation, Subject, Sub-Subject columns
-                    </p>
-                </div>
-                
-                <!-- Or use default -->
-                <div class="text-center">
-                    <button onclick="useDefaultSheet()" class="text-blue-600 hover:underline text-sm">
-                        <i class="fas fa-database mr-1"></i>Use Default Sample Questions
-                    </button>
-                </div>
-                
-                <!-- Load Button -->
-                <button onclick="loadSheetData()" class="w-full btn-nta btn-proceed">
-                    <i class="fas fa-download mr-2"></i>Load Questions
-                </button>
-                
-                <!-- Loading Indicator -->
-                <div id="setupLoader" class="hidden text-center py-4">
-                    <i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i>
-                    <p class="text-gray-600 mt-2">Loading questions...</p>
-                </div>
-            </div>
+            <h2 class="text-xl font-bold mb-2" data-en="Security Check" data-hi="सुरक्षा जांच">Security Check</h2>
+            <p class="text-gray-500 mb-4 text-sm" data-en="Please enter password to access the test" data-hi="कृपया टेस्ट एक्सेस करने के लिए पासवर्ड दर्ज करें">Please enter password to access the test</p>
+            <input type="password" id="sitePass" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-4 text-center text-lg focus:border-blue-500 focus:outline-none" placeholder="Enter Password" data-placeholder-en="Enter Password" data-placeholder-hi="पासवर्ड दर्ज करें">
+            <button onclick="checkPass()" id="unlockBtn" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold active:scale-95 transition hover:bg-blue-700">
+                <i class="fas fa-unlock mr-2"></i><span data-en="Unlock" data-hi="अनलॉक">Unlock</span>
+            </button>
+            <p id="passError" class="text-red-500 text-sm mt-3 hidden">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                <span data-en="Wrong Password!" data-hi="गलत पासवर्ड!">Wrong Password!</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- ==================== LOADING SECTION ==================== -->
+    <div id="loadingSection" class="hidden-all min-h-screen flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-5xl text-blue-600 mb-4"></i>
+            <p class="text-xl font-semibold text-gray-700" data-en="Loading Questions..." data-hi="प्रश्न लोड हो रहे हैं...">Loading Questions...</p>
         </div>
     </div>
 
@@ -204,33 +188,33 @@
     <div id="subjectSection" class="hidden-all min-h-screen flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="nta-orange text-white p-4 text-center">
-                <h2 class="text-xl font-bold"><i class="fas fa-book mr-2"></i>Select Subject</h2>
+                <h2 class="text-xl font-bold"><i class="fas fa-book mr-2"></i><span data-en="Select Subject" data-hi="विषय चुनें">Select Subject</span></h2>
             </div>
             <div class="p-6 space-y-4">
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Subject</label>
+                    <label class="block text-gray-700 font-semibold mb-2" data-en="Subject" data-hi="विषय">Subject</label>
                     <select id="mainSubject" onchange="updateSubSubjects()" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
-                        <option value="">-- Select Subject --</option>
+                        <option value="" data-en="-- Select Subject --" data-hi="-- विषय चुनें --">-- Select Subject --</option>
                     </select>
                 </div>
                 <div id="subSubjectContainer" class="hidden">
-                    <label class="block text-gray-700 font-semibold mb-2">Sub-Subject / Topic</label>
+                    <label class="block text-gray-700 font-semibold mb-2" data-en="Sub-Subject / Topic" data-hi="उप-विषय / टॉपिक">Sub-Subject / Topic</label>
                     <select id="subSubject" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
-                        <option value="">-- All Topics --</option>
+                        <option value="" data-en="-- All Topics --" data-hi="-- सभी टॉपिक --">-- All Topics --</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Number of Questions</label>
+                    <label class="block text-gray-700 font-semibold mb-2" data-en="Number of Questions" data-hi="प्रश्नों की संख्या">Number of Questions</label>
                     <select id="questionCount" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none">
-                        <option value="10">10 Questions</option>
-                        <option value="25">25 Questions</option>
-                        <option value="50">50 Questions</option>
-                        <option value="100">100 Questions</option>
-                        <option value="all">All Available</option>
+                        <option value="10">10 <span data-en="Questions" data-hi="प्रश्न">Questions</span></option>
+                        <option value="25">25 <span data-en="Questions" data-hi="प्रश्न">Questions</span></option>
+                        <option value="50">50 <span data-en="Questions" data-hi="प्रश्न">Questions</span></option>
+                        <option value="100">100 <span data-en="Questions" data-hi="प्रश्न">Questions</span></option>
+                        <option value="all" data-en="All Available" data-hi="सभी उपलब्ध">All Available</option>
                     </select>
                 </div>
                 <button onclick="startExam()" class="w-full btn-nta btn-proceed mt-4">
-                    <i class="fas fa-play mr-2"></i>Start Exam
+                    <i class="fas fa-play mr-2"></i><span data-en="Start Exam" data-hi="परीक्षा शुरू करें">Start Exam</span>
                 </button>
             </div>
         </div>
@@ -251,9 +235,9 @@
                     </div>
                 </div>
                 <div>
-                    <select class="p-2 rounded text-gray-800 text-sm">
-                        <option>English</option>
-                        <option>Hindi</option>
+                    <select id="languageSelect" onchange="changeLanguage()" class="p-2 rounded text-gray-800 text-sm">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
                     </select>
                 </div>
             </div>
@@ -262,53 +246,53 @@
         <!-- Orange Bar -->
         <div class="nta-orange text-white p-3">
             <div class="max-w-7xl mx-auto">
-                <h2 class="text-lg font-bold">GENERAL INSTRUCTIONS</h2>
+                <h2 class="text-lg font-bold" data-en="GENERAL INSTRUCTIONS" data-hi="सामान्य निर्देश">GENERAL INSTRUCTIONS</h2>
             </div>
         </div>
         
         <!-- Content -->
         <div class="max-w-5xl mx-auto p-6">
-            <h3 class="text-xl font-bold text-center mb-6">Please read the instructions carefully</h3>
+            <h3 class="text-xl font-bold text-center mb-6" data-en="Please read the instructions carefully" data-hi="कृपया निर्देश ध्यान से पढ़ें">Please read the instructions carefully</h3>
             
             <div class="bg-white p-6 rounded-lg shadow mb-6">
-                <h4 class="font-bold text-lg mb-4">General Instructions:</h4>
+                <h4 class="font-bold text-lg mb-4" data-en="General Instructions:" data-hi="सामान्य निर्देश:">General Instructions:</h4>
                 <ol class="list-decimal list-inside space-y-3 text-gray-700">
-                    <li>Total duration of the test will be displayed on the timer.</li>
-                    <li>The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.</li>
-                    <li>When the timer reaches zero, the examination will end by itself.</li>
-                    <li>The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:</li>
+                    <li data-en="Total duration of the test will be displayed on the timer." data-hi="परीक्षा की कुल अवधि टाइमर पर प्रदर्शित होगी।">Total duration of the test will be displayed on the timer.</li>
+                    <li data-en="The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination." data-hi="घड़ी सर्वर पर सेट होगी। स्क्रीन के ऊपरी दाएं कोने में काउंटडाउन टाइमर आपके लिए परीक्षा पूरी करने के लिए शेष समय प्रदर्शित करेगा।">The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.</li>
+                    <li data-en="When the timer reaches zero, the examination will end by itself." data-hi="जब टाइमर शून्य पर पहुंच जाएगा, तो परीक्षा स्वयं समाप्त हो जाएगी।">When the timer reaches zero, the examination will end by itself.</li>
+                    <li data-en="The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:" data-hi="स्क्रीन के दाईं ओर प्रदर्शित प्रश्न पैलेट निम्नलिखित प्रतीकों में से किसी एक का उपयोग करके प्रत्येक प्रश्न की स्थिति दिखाएगा:">The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:</li>
                 </ol>
                 
                 <!-- Legend -->
                 <div class="mt-6 grid md:grid-cols-2 gap-4">
                     <div class="legend-item">
                         <div class="legend-box palette-not-visited"></div>
-                        <span>You have <strong>not visited</strong> the question yet.</span>
+                        <span data-en="You have not visited the question yet." data-hi="आपने अभी तक प्रश्न नहीं देखा है।">You have <strong>not visited</strong> the question yet.</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-box palette-not-answered"></div>
-                        <span>You have <strong>not answered</strong> the question.</span>
+                        <span data-en="You have not answered the question." data-hi="आपने प्रश्न का उत्तर नहीं दिया है।">You have <strong>not answered</strong> the question.</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-box palette-answered"></div>
-                        <span>You have <strong>answered</strong> the question.</span>
+                        <span data-en="You have answered the question." data-hi="आपने प्रश्न का उत्तर दिया है।">You have <strong>answered</strong> the question.</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-box palette-marked"></div>
-                        <span>You have <strong>NOT answered</strong> but marked for review.</span>
+                        <span data-en="You have NOT answered but marked for review." data-hi="आपने उत्तर नहीं दिया लेकिन समीक्षा के लिए चिह्नित किया है।">You have <strong>NOT answered</strong> but marked for review.</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-box palette-answered-marked"></div>
-                        <span>Answered & Marked for Review (will be considered for evaluation).</span>
+                        <span data-en="Answered & Marked for Review (will be considered for evaluation)." data-hi="उत्तर दिया और समीक्षा के लिए चिह्नित (मूल्यांकन के लिए माना जाएगा)।">Answered & Marked for Review (will be considered for evaluation).</span>
                     </div>
                 </div>
                 
                 <div class="mt-6 text-gray-700">
-                    <p class="mb-2"><strong>Marking Scheme:</strong></p>
+                    <p class="mb-2 font-bold" data-en="Marking Scheme:" data-hi="अंकन योजना:">Marking Scheme:</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li><span class="text-green-600 font-bold">+1 Mark</span> for each correct answer</li>
-                        <li><span class="text-red-600 font-bold">-1/4 Mark</span> (0.25 negative) for each wrong answer</li>
-                        <li><span class="text-gray-600 font-bold">0 Mark</span> for unattempted questions</li>
+                        <li><span class="text-green-600 font-bold">+1 <span data-en="Mark" data-hi="अंक">Mark</span></span> <span data-en="for each correct answer" data-hi="प्रत्येक सही उत्तर के लिए">for each correct answer</span></li>
+                        <li><span class="text-red-600 font-bold">-1/4 <span data-en="Mark" data-hi="अंक">Mark</span></span> <span data-en="(0.25 negative) for each wrong answer" data-hi="(0.25 नकारात्मक) प्रत्येक गलत उत्तर के लिए">(0.25 negative) for each wrong answer</span></li>
+                        <li><span class="text-gray-600 font-bold">0 <span data-en="Mark" data-hi="अंक">Mark</span></span> <span data-en="for unattempted questions" data-hi="अनुत्तरित प्रश्नों के लिए">for unattempted questions</span></li>
                     </ul>
                 </div>
             </div>
@@ -317,7 +301,7 @@
             <div class="bg-white p-6 rounded-lg shadow mb-6">
                 <label class="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" id="declaration" class="mt-1 w-5 h-5">
-                    <span class="text-gray-700">
+                    <span class="text-gray-700" data-en="I have read and understood the instructions. I am ready to take the test." data-hi="मैंने निर्देश पढ़े और समझे हैं। मैं परीक्षा देने के लिए तैयार हूं।">
                         I have read and understood the instructions. I am ready to take the test.
                     </span>
                 </label>
@@ -326,7 +310,7 @@
             <!-- Proceed Button -->
             <div class="text-center">
                 <button onclick="proceedToExam()" class="btn-nta btn-proceed">
-                    <i class="fas fa-arrow-right mr-2"></i>PROCEED
+                    <i class="fas fa-arrow-right mr-2"></i><span data-en="PROCEED" data-hi="आगे बढ़ें">PROCEED</span>
                 </button>
             </div>
         </div>
@@ -348,11 +332,11 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right hidden sm:block">
-                        <p class="text-xs text-blue-200">Candidate Name</p>
-                        <p class="font-semibold">Student</p>
+                        <p class="text-xs text-blue-200" data-en="Candidate Name" data-hi="उम्मीदवार का नाम">Candidate Name</p>
+                        <p class="font-semibold" data-en="Student" data-hi="छात्र">Student</p>
                     </div>
                     <div class="text-right hidden sm:block">
-                        <p class="text-xs text-blue-200">Subject</p>
+                        <p class="text-xs text-blue-200" data-en="Subject" data-hi="विषय">Subject</p>
                         <p class="font-semibold" id="examSubject">Test</p>
                     </div>
                     <div class="timer-box">
@@ -367,7 +351,7 @@
             <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <h2 class="font-bold" id="examTitle">Mock Test</h2>
                 <button class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
-                    <i class="fas fa-download mr-1"></i>Download Question
+                    <i class="fas fa-download mr-1"></i><span data-en="Download Question" data-hi="प्रश्न डाउनलोड करें">Download Question</span>
                 </button>
             </div>
         </div>
@@ -378,7 +362,7 @@
                 <!-- Left: Question Area -->
                 <div class="flex-1 bg-white rounded-lg shadow p-6">
                     <div id="questionContainer">
-                        <h3 class="text-lg font-bold mb-4">Question <span id="qNumber">1</span>:</h3>
+                        <h3 class="text-lg font-bold mb-4"><span data-en="Question" data-hi="प्रश्न">Question</span> <span id="qNumber">1</span>:</h3>
                         <div id="questionText" class="text-gray-800 mb-6 text-lg leading-relaxed"></div>
                         <div id="optionsContainer" class="space-y-3"></div>
                     </div>
@@ -386,55 +370,55 @@
                     <!-- Action Buttons -->
                     <div class="mt-8 flex flex-wrap gap-3">
                         <button onclick="saveAndNext()" class="btn-nta btn-save-next">
-                            <i class="fas fa-save mr-1"></i>Save & Next
+                            <i class="fas fa-save mr-1"></i><span data-en="Save & Next" data-hi="सेव और अगला">Save & Next</span>
                         </button>
                         <button onclick="saveAndMarkReview()" class="btn-nta btn-save-review">
-                            <i class="fas fa-bookmark mr-1"></i>Save & Mark for Review
+                            <i class="fas fa-bookmark mr-1"></i><span data-en="Save & Mark for Review" data-hi="सेव और समीक्षा के लिए चिह्नित करें">Save & Mark for Review</span>
                         </button>
                         <button onclick="clearResponse()" class="btn-nta btn-clear">
-                            <i class="fas fa-eraser mr-1"></i>Clear Response
+                            <i class="fas fa-eraser mr-1"></i><span data-en="Clear Response" data-hi="उत्तर हटाएं">Clear Response</span>
                         </button>
                         <button onclick="markReviewAndNext()" class="btn-nta btn-mark-review">
-                            <i class="fas fa-flag mr-1"></i>Mark for Review & Next
+                            <i class="fas fa-flag mr-1"></i><span data-en="Mark for Review & Next" data-hi="समीक्षा के लिए चिह्नित और अगला">Mark for Review & Next</span>
                         </button>
                     </div>
                     
                     <!-- Navigation -->
                     <div class="mt-6 flex justify-between">
                         <button onclick="prevQuestion()" class="px-4 py-2 border-2 border-gray-300 rounded hover:bg-gray-100">
-                            <i class="fas fa-chevron-left mr-1"></i>&lt;&lt; Back
+                            <i class="fas fa-chevron-left mr-1"></i><span>&lt;&lt; <span data-en="Back" data-hi="पीछे">Back</span></span>
                         </button>
                         <button onclick="nextQuestion()" class="px-4 py-2 border-2 border-gray-300 rounded hover:bg-gray-100">
-                            Next &gt;&gt;<i class="fas fa-chevron-right ml-1"></i>
+                            <span><span data-en="Next" data-hi="अगला">Next</span> &gt;&gt;</span><i class="fas fa-chevron-right ml-1"></i>
                         </button>
                     </div>
                 </div>
                 
                 <!-- Right: Question Palette -->
                 <div class="lg:w-80 bg-white rounded-lg shadow p-4">
-                    <h4 class="font-bold text-gray-700 mb-3 border-b pb-2">Question Palette</h4>
+                    <h4 class="font-bold text-gray-700 mb-3 border-b pb-2" data-en="Question Palette" data-hi="प्रश्न पैलेट">Question Palette</h4>
                     
                     <!-- Stats -->
                     <div class="grid grid-cols-2 gap-2 mb-4 text-xs">
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded bg-gray-400 flex items-center justify-center text-white font-bold" id="statNotVisited">0</span>
-                            <span>Not Visited</span>
+                            <span data-en="Not Visited" data-hi="नहीं देखा">Not Visited</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded bg-red-500 flex items-center justify-center text-white font-bold" id="statNotAnswered">0</span>
-                            <span>Not Answered</span>
+                            <span data-en="Not Answered" data-hi="उत्तर नहीं">Not Answered</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded bg-green-500 flex items-center justify-center text-white font-bold" id="statAnswered">0</span>
-                            <span>Answered</span>
+                            <span data-en="Answered" data-hi="उत्तर दिया">Answered</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white font-bold" id="statMarked">0</span>
-                            <span>Marked for Review</span>
+                            <span data-en="Marked for Review" data-hi="समीक्षा के लिए">Marked for Review</span>
                         </div>
                         <div class="flex items-center gap-2 col-span-2">
                             <span class="w-6 h-6 rounded bg-purple-600 border-2 border-green-500 flex items-center justify-center text-white font-bold" id="statAnsweredMarked">0</span>
-                            <span>Answered & Marked for Review</span>
+                            <span data-en="Answered & Marked for Review" data-hi="उत्तर दिया और समीक्षा के लिए">Answered & Marked for Review</span>
                         </div>
                     </div>
                     
@@ -444,7 +428,7 @@
                     
                     <!-- Submit -->
                     <button onclick="confirmSubmit()" class="w-full mt-4 btn-nta btn-submit py-3">
-                        <i class="fas fa-check-circle mr-2"></i>SUBMIT
+                        <i class="fas fa-check-circle mr-2"></i><span data-en="SUBMIT" data-hi="सबमिट">SUBMIT</span>
                     </button>
                 </div>
             </div>
@@ -454,24 +438,24 @@
     <!-- ==================== SUBMIT CONFIRMATION MODAL ==================== -->
     <div id="submitModal" class="hidden-all fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold text-center mb-4">Exam Summary</h3>
+            <h3 class="text-xl font-bold text-center mb-4" data-en="Exam Summary" data-hi="परीक्षा सारांश">Exam Summary</h3>
             <table class="w-full mb-6 text-sm">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="p-2 text-left">Status</th>
-                        <th class="p-2 text-center">Count</th>
+                        <th class="p-2 text-left" data-en="Status" data-hi="स्थिति">Status</th>
+                        <th class="p-2 text-center" data-en="Count" data-hi="संख्या">Count</th>
                     </tr>
                 </thead>
                 <tbody id="summaryTable">
                 </tbody>
             </table>
             <p class="text-center text-gray-700 mb-4 font-semibold">
-                Are you sure you want to submit for final marking?<br>
-                <span class="text-red-600 text-sm">No changes will be allowed after submission.</span>
+                <span data-en="Are you sure you want to submit for final marking?" data-hi="क्या आप अंतिम मूल्यांकन के लिए सबमिट करना चाहते हैं?">Are you sure you want to submit for final marking?</span><br>
+                <span class="text-red-600 text-sm" data-en="No changes will be allowed after submission." data-hi="सबमिशन के बाद कोई बदलाव नहीं किया जा सकेगा।">No changes will be allowed after submission.</span>
             </p>
             <div class="flex justify-center gap-4">
-                <button onclick="finalSubmit()" class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold">YES</button>
-                <button onclick="closeSubmitModal()" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-semibold">NO</button>
+                <button onclick="finalSubmit()" class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold">YES / हां</button>
+                <button onclick="closeSubmitModal()" class="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 font-semibold">NO / नहीं</button>
             </div>
         </div>
     </div>
@@ -487,119 +471,304 @@
         </div>
         
         <div class="max-w-5xl mx-auto p-6">
-            <h2 class="text-2xl font-bold text-center mb-6">Result</h2>
+            <h2 class="text-2xl font-bold text-center mb-6" data-en="Result" data-hi="परिणाम">Result</h2>
             
             <!-- Score Card -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="text-center p-4 bg-blue-50 rounded-lg">
-                        <p class="text-gray-600 text-sm">Total Questions</p>
+                        <p class="text-gray-600 text-sm" data-en="Total Questions" data-hi="कुल प्रश्न">Total Questions</p>
                         <p class="text-2xl font-bold text-blue-600" id="resTotal">0</p>
                     </div>
                     <div class="text-center p-4 bg-green-50 rounded-lg">
-                        <p class="text-gray-600 text-sm">Correct</p>
+                        <p class="text-gray-600 text-sm" data-en="Correct" data-hi="सही">Correct</p>
                         <p class="text-2xl font-bold text-green-600" id="resCorrect">0</p>
                     </div>
                     <div class="text-center p-4 bg-red-50 rounded-lg">
-                        <p class="text-gray-600 text-sm">Wrong</p>
+                        <p class="text-gray-600 text-sm" data-en="Wrong" data-hi="गलत">Wrong</p>
                         <p class="text-2xl font-bold text-red-600" id="resWrong">0</p>
                     </div>
                     <div class="text-center p-4 bg-yellow-50 rounded-lg">
-                        <p class="text-gray-600 text-sm">Unattempted</p>
+                        <p class="text-gray-600 text-sm" data-en="Unattempted" data-hi="अनुत्तरित">Unattempted</p>
                         <p class="text-2xl font-bold text-yellow-600" id="resUnattempted">0</p>
                     </div>
                 </div>
                 
                 <div class="text-center p-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white">
-                    <p class="text-lg mb-2">Final Score</p>
+                    <p class="text-lg mb-2" data-en="Final Score" data-hi="अंतिम स्कोर">Final Score</p>
                     <p class="text-5xl font-bold" id="resScore">0.00</p>
-                    <p class="text-sm mt-2 opacity-80">(+1 for correct, -0.25 for wrong)</p>
+                    <p class="text-sm mt-2 opacity-80">(+1 <span data-en="for correct" data-hi="सही के लिए">for correct</span>, -0.25 <span data-en="for wrong" data-hi="गलत के लिए">for wrong</span>)</p>
                 </div>
                 
                 <div class="mt-6 text-center">
                     <button onclick="restartTest()" class="btn-nta btn-proceed mr-3">
-                        <i class="fas fa-redo mr-2"></i>Take Test Again
+                        <i class="fas fa-redo mr-2"></i><span data-en="Take Test Again" data-hi="फिर से टेस्ट दें">Take Test Again</span>
                     </button>
                     <button onclick="newTest()" class="btn-nta bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded">
-                        <i class="fas fa-home mr-2"></i>New Test
+                        <i class="fas fa-home mr-2"></i><span data-en="New Test" data-hi="नया टेस्ट">New Test</span>
                     </button>
                 </div>
             </div>
             
             <!-- Wrong Questions First -->
             <h3 class="text-xl font-bold mb-4 text-red-600">
-                <i class="fas fa-times-circle mr-2"></i>Wrong Answers (Review with Explanation)
+                <i class="fas fa-times-circle mr-2"></i><span data-en="Wrong Answers (Review with Explanation)" data-hi="गलत उत्तर (व्याख्या के साथ)">Wrong Answers (Review with Explanation)</span>
             </h3>
             <div id="wrongQuestionsList" class="space-y-4 mb-8"></div>
             
             <!-- Correct Answers -->
             <h3 class="text-xl font-bold mb-4 text-green-600">
-                <i class="fas fa-check-circle mr-2"></i>Correct Answers
+                <i class="fas fa-check-circle mr-2"></i><span data-en="Correct Answers" data-hi="सही उत्तर">Correct Answers</span>
             </h3>
             <div id="correctQuestionsList" class="space-y-4 mb-8"></div>
             
             <!-- Skipped Questions -->
             <h3 class="text-xl font-bold mb-4 text-gray-600">
-                <i class="fas fa-minus-circle mr-2"></i>Unattempted Questions
+                <i class="fas fa-minus-circle mr-2"></i><span data-en="Unattempted Questions" data-hi="अनुत्तरित प्रश्न">Unattempted Questions</span>
             </h3>
             <div id="skippedQuestionsList" class="space-y-4"></div>
         </div>
     </div>
 
     <script>
-        // ==================== CONFIGURATION ====================
-        const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSi1bISVEXcozetKBccCL7yKkzkQCIF5FV1U2zL2P8UiHAaRcePz3TqtAaLqOqWypzQfFW3wDt0RAoZ/pub?output=csv';
+        // ==================== CONFIGURATION (HIDDEN FROM USERS) ====================
+        const CONFIG = {
+            PASSWORD: '208025',  // 🔒 CHANGE YOUR PASSWORD HERE
+            SHEET_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSi1bISVEXcozetKBccCL7yKkzkQCIF5FV1U2zL2P8UiHAaRcePz3TqtAaLqOqWypzQfFW3wDt0RAoZ/pub?output=csv'
+        };
+        
+        // ==================== TRANSLATIONS ====================
+        const translations = {
+            en: {
+                'Security Check': 'Security Check',
+                'Please enter password to access the test': 'Please enter password to access the test',
+                'Enter Password': 'Enter Password',
+                'Unlock': 'Unlock',
+                'Wrong Password!': 'Wrong Password!',
+                'Loading Questions...': 'Loading Questions...',
+                'Select Subject': 'Select Subject',
+                'Subject': 'Subject',
+                '-- Select Subject --': '-- Select Subject --',
+                'Sub-Subject / Topic': 'Sub-Subject / Topic',
+                '-- All Topics --': '-- All Topics --',
+                'Number of Questions': 'Number of Questions',
+                'Questions': 'Questions',
+                'All Available': 'All Available',
+                'Start Exam': 'Start Exam',
+                'GENERAL INSTRUCTIONS': 'GENERAL INSTRUCTIONS',
+                'Please read the instructions carefully': 'Please read the instructions carefully',
+                'General Instructions:': 'General Instructions:',
+                'Total duration of the test will be displayed on the timer.': 'Total duration of the test will be displayed on the timer.',
+                'The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.': 'The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.',
+                'When the timer reaches zero, the examination will end by itself.': 'When the timer reaches zero, the examination will end by itself.',
+                'The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:': 'The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:',
+                'You have not visited the question yet.': 'You have <strong>not visited</strong> the question yet.',
+                'You have not answered the question.': 'You have <strong>not answered</strong> the question.',
+                'You have answered the question.': 'You have <strong>answered</strong> the question.',
+                'You have NOT answered but marked for review.': 'You have <strong>NOT answered</strong> but marked for review.',
+                'Answered & Marked for Review (will be considered for evaluation).': 'Answered & Marked for Review (will be considered for evaluation).',
+                'Marking Scheme:': 'Marking Scheme:',
+                'Mark': 'Mark',
+                'for each correct answer': 'for each correct answer',
+                '(0.25 negative) for each wrong answer': '(0.25 negative) for each wrong answer',
+                'for unattempted questions': 'for unattempted questions',
+                'I have read and understood the instructions. I am ready to take the test.': 'I have read and understood the instructions. I am ready to take the test.',
+                'PROCEED': 'PROCEED',
+                'Candidate Name': 'Candidate Name',
+                'Student': 'Student',
+                'Download Question': 'Download Question',
+                'Question': 'Question',
+                'Save & Next': 'Save & Next',
+                'Save & Mark for Review': 'Save & Mark for Review',
+                'Clear Response': 'Clear Response',
+                'Mark for Review & Next': 'Mark for Review & Next',
+                'Back': 'Back',
+                'Next': 'Next',
+                'Question Palette': 'Question Palette',
+                'Not Visited': 'Not Visited',
+                'Not Answered': 'Not Answered',
+                'Answered': 'Answered',
+                'Marked for Review': 'Marked for Review',
+                'Answered & Marked for Review': 'Answered & Marked for Review',
+                'SUBMIT': 'SUBMIT',
+                'Exam Summary': 'Exam Summary',
+                'Status': 'Status',
+                'Count': 'Count',
+                'Are you sure you want to submit for final marking?': 'Are you sure you want to submit for final marking?',
+                'No changes will be allowed after submission.': 'No changes will be allowed after submission.',
+                'Result': 'Result',
+                'Total Questions': 'Total Questions',
+                'Correct': 'Correct',
+                'Wrong': 'Wrong',
+                'Unattempted': 'Unattempted',
+                'Final Score': 'Final Score',
+                'for correct': 'for correct',
+                'for wrong': 'for wrong',
+                'Wrong Answers (Review with Explanation)': 'Wrong Answers (Review with Explanation)',
+                'Correct Answers': 'Correct Answers',
+                'Unattempted Questions': 'Unattempted Questions',
+                'Take Test Again': 'Take Test Again',
+                'New Test': 'New Test',
+                'Sahi Uttar': 'Correct Answer',
+                'Aapka Uttar': 'Your Answer',
+                'Vyakhya': 'Explanation',
+                'Attempt nahi kiya': 'Not attempted',
+                'No explanation': 'No explanation available.'
+            },
+            hi: {
+                'Security Check': 'सुरक्षा जांच',
+                'Please enter password to access the test': 'कृपया टेस्ट एक्सेस करने के लिए पासवर्ड दर्ज करें',
+                'Enter Password': 'पासवर्ड दर्ज करें',
+                'Unlock': 'अनलॉक',
+                'Wrong Password!': 'गलत पासवर्ड!',
+                'Loading Questions...': 'प्रश्न लोड हो रहे हैं...',
+                'Select Subject': 'विषय चुनें',
+                'Subject': 'विषय',
+                '-- Select Subject --': '-- विषय चुनें --',
+                'Sub-Subject / Topic': 'उप-विषय / टॉपिक',
+                '-- All Topics --': '-- सभी टॉपिक --',
+                'Number of Questions': 'प्रश्नों की संख्या',
+                'Questions': 'प्रश्न',
+                'All Available': 'सभी उपलब्ध',
+                'Start Exam': 'परीक्षा शुरू करें',
+                'GENERAL INSTRUCTIONS': 'सामान्य निर्देश',
+                'Please read the instructions carefully': 'कृपया निर्देश ध्यान से पढ़ें',
+                'General Instructions:': 'सामान्य निर्देश:',
+                'Total duration of the test will be displayed on the timer.': 'परीक्षा की कुल अवधि टाइमर पर प्रदर्शित होगी।',
+                'The clock will be set at the server. The countdown timer in the top right corner of screen will display the remaining time available for you to complete the examination.': 'घड़ी सर्वर पर सेट होगी। स्क्रीन के ऊपरी दाएं कोने में काउंटडाउन टाइमर आपके लिए परीक्षा पूरी करने के लिए शेष समय प्रदर्शित करेगा।',
+                'When the timer reaches zero, the examination will end by itself.': 'जब टाइमर शून्य पर पहुंच जाएगा, तो परीक्षा स्वयं समाप्त हो जाएगी।',
+                'The Questions Palette displayed on the right side of screen will show the status of each question using one of the following symbols:': 'स्क्रीन के दाईं ओर प्रदर्शित प्रश्न पैलेट निम्नलिखित प्रतीकों में से किसी एक का उपयोग करके प्रत्येक प्रश्न की स्थिति दिखाएगा:',
+                'You have not visited the question yet.': 'आपने अभी तक प्रश्न नहीं देखा है।',
+                'You have not answered the question.': 'आपने प्रश्न का उत्तर नहीं दिया है।',
+                'You have answered the question.': 'आपने प्रश्न का उत्तर दिया है।',
+                'You have NOT answered but marked for review.': 'आपने उत्तर नहीं दिया लेकिन समीक्षा के लिए चिह्नित किया है।',
+                'Answered & Marked for Review (will be considered for evaluation).': 'उत्तर दिया और समीक्षा के लिए चिह्नित (मूल्यांकन के लिए माना जाएगा)।',
+                'Marking Scheme:': 'अंकन योजना:',
+                'Mark': 'अंक',
+                'for each correct answer': 'प्रत्येक सही उत्तर के लिए',
+                '(0.25 negative) for each wrong answer': '(0.25 नकारात्मक) प्रत्येक गलत उत्तर के लिए',
+                'for unattempted questions': 'अनुत्तरित प्रश्नों के लिए',
+                'I have read and understood the instructions. I am ready to take the test.': 'मैंने निर्देश पढ़े और समझे हैं। मैं परीक्षा देने के लिए तैयार हूं।',
+                'PROCEED': 'आगे बढ़ें',
+                'Candidate Name': 'उम्मीदवार का नाम',
+                'Student': 'छात्र',
+                'Download Question': 'प्रश्न डाउनलोड करें',
+                'Question': 'प्रश्न',
+                'Save & Next': 'सेव और अगला',
+                'Save & Mark for Review': 'सेव और समीक्षा के लिए चिह्नित करें',
+                'Clear Response': 'उत्तर हटाएं',
+                'Mark for Review & Next': 'समीक्षा के लिए चिह्नित और अगला',
+                'Back': 'पीछे',
+                'Next': 'अगला',
+                'Question Palette': 'प्रश्न पैलेट',
+                'Not Visited': 'नहीं देखा',
+                'Not Answered': 'उत्तर नहीं',
+                'Answered': 'उत्तर दिया',
+                'Marked for Review': 'समीक्षा के लिए',
+                'Answered & Marked for Review': 'उत्तर दिया और समीक्षा के लिए',
+                'SUBMIT': 'सबमिट',
+                'Exam Summary': 'परीक्षा सारांश',
+                'Status': 'स्थिति',
+                'Count': 'संख्या',
+                'Are you sure you want to submit for final marking?': 'क्या आप अंतिम मूल्यांकन के लिए सबमिट करना चाहते हैं?',
+                'No changes will be allowed after submission.': 'सबमिशन के बाद कोई बदलाव नहीं किया जा सकेगा।',
+                'Result': 'परिणाम',
+                'Total Questions': 'कुल प्रश्न',
+                'Correct': 'सही',
+                'Wrong': 'गलत',
+                'Unattempted': 'अनुत्तरित',
+                'Final Score': 'अंतिम स्कोर',
+                'for correct': 'सही के लिए',
+                'for wrong': 'गलत के लिए',
+                'Wrong Answers (Review with Explanation)': 'गलत उत्तर (व्याख्या के साथ)',
+                'Correct Answers': 'सही उत्तर',
+                'Unattempted Questions': 'अनुत्तरित प्रश्न',
+                'Take Test Again': 'फिर से टेस्ट दें',
+                'New Test': 'नया टेस्ट',
+                'Sahi Uttar': 'सही उत्तर',
+                'Aapka Uttar': 'आपका उत्तर',
+                'Vyakhya': 'व्याख्या',
+                'Attempt nahi kiya': 'प्रयास नहीं किया',
+                'No explanation': 'कोई व्याख्या उपलब्ध नहीं।'
+            }
+        };
+        
+        let currentLang = 'en';
+        
+        function changeLanguage() {
+            currentLang = document.getElementById('languageSelect').value;
+            updateLanguage();
+        }
+        
+        function updateLanguage() {
+            // Update all elements with data-en and data-hi attributes
+            document.querySelectorAll('[data-en][data-hi]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + currentLang);
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-placeholder-en][data-placeholder-hi]').forEach(el => {
+                el.placeholder = el.getAttribute('data-placeholder-' + currentLang);
+            });
+            
+            // Update select options
+            document.querySelectorAll('option[data-en][data-hi]').forEach(opt => {
+                opt.textContent = opt.getAttribute('data-' + currentLang);
+            });
+        }
         
         // ==================== GLOBAL VARIABLES ====================
         let allQuestions = [];
         let filteredQuestions = [];
         let currentQuestions = [];
         let userAnswers = [];
-        let questionStatus = []; // 'not-visited', 'not-answered', 'answered', 'marked', 'answered-marked'
+        let questionStatus = [];
         let currentIndex = 0;
         let timerInterval;
         let timeRemaining = 0;
         let selectedOption = null;
         
-        // ==================== SETUP FUNCTIONS ====================
-        function useDefaultSheet() {
-            document.getElementById('sheetUrl').value = DEFAULT_SHEET_URL;
+        // ==================== PASSWORD CHECK ====================
+        function checkPass() {
+            const pass = document.getElementById('sitePass').value;
+            if (pass === CONFIG.PASSWORD) {
+                document.getElementById('passwordOverlay').classList.add('hidden-all');
+                document.getElementById('loadingSection').classList.remove('hidden-all');
+                loadSheetData();
+            } else {
+                document.getElementById('passError').classList.remove('hidden');
+            }
         }
         
+        // Allow Enter key to submit password
+        document.getElementById('sitePass')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkPass();
+        });
+        
+        // ==================== LOAD DATA ====================
         function loadSheetData() {
-            const url = document.getElementById('sheetUrl').value.trim();
-            if (!url) {
-                alert('Please enter a Google Sheet CSV link!');
-                return;
-            }
-            
-            document.getElementById('setupLoader').classList.remove('hidden');
-            
-            Papa.parse(url, {
+            Papa.parse(CONFIG.SHEET_URL, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
-                    document.getElementById('setupLoader').classList.add('hidden');
-                    
                     if (results.data && results.data.length > 0) {
                         allQuestions = results.data.filter(q => q.Question && q.Question.trim() !== '');
                         
                         if (allQuestions.length === 0) {
-                            alert('No valid questions found in the sheet!');
+                            alert(currentLang === 'hi' ? 'शीट में कोई वैध प्रश्न नहीं मिले!' : 'No valid questions found in the sheet!');
                             return;
                         }
                         
                         populateSubjects();
-                        document.getElementById('setupSection').classList.add('hidden-all');
+                        document.getElementById('loadingSection').classList.add('hidden-all');
                         document.getElementById('subjectSection').classList.remove('hidden-all');
                     } else {
-                        alert('No data found in the sheet!');
+                        alert(currentLang === 'hi' ? 'शीट में कोई डेटा नहीं मिला!' : 'No data found in the sheet!');
                     }
                 },
                 error: function(error) {
-                    document.getElementById('setupLoader').classList.add('hidden');
-                    alert('Error loading sheet: ' + error.message);
+                    alert((currentLang === 'hi' ? 'शीट लोड करने में त्रुटि: ' : 'Error loading sheet: ') + error.message);
                 }
             });
         }
@@ -607,7 +776,7 @@
         function populateSubjects() {
             const subjects = [...new Set(allQuestions.map(q => q.Subject))].filter(s => s).sort();
             const select = document.getElementById('mainSubject');
-            select.innerHTML = '<option value="">-- Select Subject --</option>';
+            select.innerHTML = `<option value="">${currentLang === 'hi' ? '-- विषय चुनें --' : '-- Select Subject --'}</option>`;
             subjects.forEach(s => {
                 select.innerHTML += `<option value="${s}">${s}</option>`;
             });
@@ -630,7 +799,7 @@
             
             if (subSubjects.length > 0) {
                 container.classList.remove('hidden');
-                subSelect.innerHTML = '<option value="">-- All Topics --</option>';
+                subSelect.innerHTML = `<option value="">${currentLang === 'hi' ? '-- सभी टॉपिक --' : '-- All Topics --'}</option>`;
                 subSubjects.forEach(s => {
                     subSelect.innerHTML += `<option value="${s}">${s}</option>`;
                 });
@@ -645,11 +814,10 @@
             const count = document.getElementById('questionCount').value;
             
             if (!subject) {
-                alert('Please select a subject!');
+                alert(currentLang === 'hi' ? 'कृपया एक विषय चुनें!' : 'Please select a subject!');
                 return;
             }
             
-            // Filter questions
             filteredQuestions = allQuestions.filter(q => {
                 if (q.Subject !== subject) return false;
                 if (subSubject) {
@@ -660,11 +828,10 @@
             });
             
             if (filteredQuestions.length === 0) {
-                alert('No questions found for selected criteria!');
+                alert(currentLang === 'hi' ? 'चयनित मानदंड के लिए कोई प्रश्न नहीं मिले!' : 'No questions found for selected criteria!');
                 return;
             }
             
-            // Shuffle and limit
             filteredQuestions = shuffleArray([...filteredQuestions]);
             if (count !== 'all' && filteredQuestions.length > parseInt(count)) {
                 filteredQuestions = filteredQuestions.slice(0, parseInt(count));
@@ -682,14 +849,13 @@
         
         function proceedToExam() {
             if (!document.getElementById('declaration').checked) {
-                alert('Please accept the declaration to proceed!');
+                alert(currentLang === 'hi' ? 'कृपया आगे बढ़ने के लिए घोषणा स्वीकार करें!' : 'Please accept the declaration to proceed!');
                 return;
             }
             
             document.getElementById('instructionSection').classList.add('hidden-all');
             document.getElementById('examSection').classList.remove('hidden-all');
             
-            // Calculate time (1 minute per question)
             timeRemaining = currentQuestions.length * 60;
             startTimer();
             
@@ -706,7 +872,7 @@
                 updateTimerDisplay();
                 if (timeRemaining <= 0) {
                     clearInterval(timerInterval);
-                    alert('Time is up! Submitting your test...');
+                    alert(currentLang === 'hi' ? 'समय समाप्त! आपकी परीक्षा सबमिट हो रही है...' : 'Time is up! Submitting your test...');
                     finalSubmit();
                 }
             }, 1000);
@@ -726,12 +892,10 @@
             document.getElementById('qNumber').textContent = currentIndex + 1;
             document.getElementById('questionText').innerHTML = q.Question;
             
-            // Mark as visited
             if (questionStatus[currentIndex] === 'not-visited') {
                 questionStatus[currentIndex] = 'not-answered';
             }
             
-            // Render options
             const optionsDiv = document.getElementById('optionsContainer');
             optionsDiv.innerHTML = '';
             
@@ -777,7 +941,6 @@
                 btn.className = 'palette-btn';
                 btn.textContent = i + 1;
                 
-                // Add status class
                 let statusClass = 'palette-not-visited';
                 if (questionStatus[i] === 'not-answered') statusClass = 'palette-not-answered';
                 else if (questionStatus[i] === 'answered') statusClass = 'palette-answered';
@@ -785,7 +948,6 @@
                 else if (questionStatus[i] === 'answered-marked') statusClass = 'palette-answered-marked';
                 btn.classList.add(statusClass);
                 
-                // Highlight current
                 if (i === currentIndex) btn.classList.add('palette-current');
                 
                 btn.onclick = () => goToQuestion(i);
@@ -873,11 +1035,11 @@
             
             const tbody = document.getElementById('summaryTable');
             tbody.innerHTML = `
-                <tr><td class="p-2 border">Answered</td><td class="p-2 border text-center">${stats.answered}</td></tr>
-                <tr><td class="p-2 border">Not Answered</td><td class="p-2 border text-center">${stats.notAnswered}</td></tr>
-                <tr><td class="p-2 border">Marked for Review</td><td class="p-2 border text-center">${stats.marked}</td></tr>
-                <tr><td class="p-2 border">Not Visited</td><td class="p-2 border text-center">${stats.notVisited}</td></tr>
-                <tr class="bg-gray-100 font-bold"><td class="p-2 border">Total</td><td class="p-2 border text-center">${currentQuestions.length}</td></tr>
+                <tr><td class="p-2 border">${currentLang === 'hi' ? 'उत्तर दिया' : 'Answered'}</td><td class="p-2 border text-center">${stats.answered}</td></tr>
+                <tr><td class="p-2 border">${currentLang === 'hi' ? 'उत्तर नहीं' : 'Not Answered'}</td><td class="p-2 border text-center">${stats.notAnswered}</td></tr>
+                <tr><td class="p-2 border">${currentLang === 'hi' ? 'समीक्षा के लिए' : 'Marked for Review'}</td><td class="p-2 border text-center">${stats.marked}</td></tr>
+                <tr><td class="p-2 border">${currentLang === 'hi' ? 'नहीं देखा' : 'Not Visited'}</td><td class="p-2 border text-center">${stats.notVisited}</td></tr>
+                <tr class="bg-gray-100 font-bold"><td class="p-2 border">${currentLang === 'hi' ? 'कुल' : 'Total'}</td><td class="p-2 border text-center">${currentQuestions.length}</td></tr>
             `;
             
             document.getElementById('submitModal').classList.remove('hidden-all');
@@ -907,7 +1069,6 @@
                 const userAns = userAnswers[i];
                 const correctAns = (q.Answer || '').toString().trim().toLowerCase();
                 
-                // Map answer to option number
                 let correctNum = '';
                 if (correctAns === 'a' || correctAns === '1') correctNum = '1';
                 else if (correctAns === 'b' || correctAns === '2') correctNum = '2';
@@ -920,7 +1081,7 @@
                     userAnswer: userAns,
                     correctAnswer: correctNum,
                     correctText: q[`Option ${correctAns.toUpperCase()}`] || q[`Option${correctAns.toUpperCase()}`] || q[correctAns.toUpperCase()],
-                    explanation: q.Explanation || 'No explanation available.',
+                    explanation: q.Explanation || (currentLang === 'hi' ? 'कोई व्याख्या उपलब्ध नहीं।' : 'No explanation available.'),
                     options: {
                         A: q['Option A'] || q['OptionA'] || q.A,
                         B: q['Option B'] || q['OptionB'] || q.B,
@@ -941,17 +1102,14 @@
                 }
             });
             
-            // Calculate score: +1 for correct, -0.25 for wrong
             const score = correct - (wrong * 0.25);
             
-            // Update summary
             document.getElementById('resTotal').textContent = currentQuestions.length;
             document.getElementById('resCorrect').textContent = correct;
             document.getElementById('resWrong').textContent = wrong;
             document.getElementById('resUnattempted').textContent = unattempted;
             document.getElementById('resScore').textContent = score.toFixed(2);
             
-            // Render wrong questions first
             renderQuestionList('wrongQuestionsList', wrongQuestions, 'wrong');
             renderQuestionList('correctQuestionsList', correctQuestions, 'correct');
             renderQuestionList('skippedQuestionsList', skippedQuestions, 'skipped');
@@ -960,9 +1118,14 @@
         function renderQuestionList(containerId, questions, type) {
             const container = document.getElementById(containerId);
             if (questions.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 italic">No questions in this category.</p>';
+                container.innerHTML = `<p class="text-gray-500 italic">${currentLang === 'hi' ? 'इस श्रेणी में कोई प्रश्न नहीं।' : 'No questions in this category.'}</p>`;
                 return;
             }
+            
+            const sahiUttar = currentLang === 'hi' ? 'सही उत्तर' : 'Correct Answer';
+            const aapkaUttar = currentLang === 'hi' ? 'आपका उत्तर' : 'Your Answer';
+            const vyakhya = currentLang === 'hi' ? 'व्याख्या' : 'Explanation';
+            const attemptNahi = currentLang === 'hi' ? 'प्रयास नहीं किया' : 'Not attempted';
             
             container.innerHTML = questions.map(q => {
                 const userOpt = q.userAnswer ? ['A', 'B', 'C', 'D'][q.userAnswer - 1] : '-';
@@ -970,34 +1133,36 @@
                 
                 let statusHtml = '';
                 if (type === 'wrong') {
-                    statusHtml = `<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold">WRONG</span>`;
+                    statusHtml = `<span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold">${currentLang === 'hi' ? 'गलत' : 'WRONG'}</span>`;
                 } else if (type === 'correct') {
-                    statusHtml = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">CORRECT</span>`;
+                    statusHtml = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">${currentLang === 'hi' ? 'सही' : 'CORRECT'}</span>`;
                 } else {
-                    statusHtml = `<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-bold">NOT ATTEMPTED</span>`;
+                    statusHtml = `<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-bold">${currentLang === 'hi' ? 'प्रयास नहीं' : 'NOT ATTEMPTED'}</span>`;
                 }
+                
+                const questionLabel = currentLang === 'hi' ? 'प्रश्न' : 'Question';
                 
                 return `
                     <div class="bg-white rounded-lg shadow p-4 result-${type}">
                         <div class="flex items-center justify-between mb-3">
-                            <h4 class="font-bold text-gray-800">Question ${q.index}</h4>
+                            <h4 class="font-bold text-gray-800">${questionLabel} ${q.index}</h4>
                             ${statusHtml}
                         </div>
                         <p class="text-gray-700 mb-3">${q.question}</p>
                         <div class="grid md:grid-cols-2 gap-2 mb-3 text-sm">
                             <div class="bg-green-50 p-2 rounded border border-green-200">
-                                <span class="font-semibold text-green-700">Correct Answer: ${correctOpt}</span>
+                                <span class="font-semibold text-green-700">${sahiUttar}: ${correctOpt}</span>
                                 <p class="text-gray-600">${q.options[correctOpt] || ''}</p>
                             </div>
                             ${type === 'wrong' ? `
                             <div class="bg-red-50 p-2 rounded border border-red-200">
-                                <span class="font-semibold text-red-700">Your Answer: ${userOpt}</span>
-                                <p class="text-gray-600">${q.options[userOpt] || 'Not answered'}</p>
+                                <span class="font-semibold text-red-700">${aapkaUttar}: ${userOpt}</span>
+                                <p class="text-gray-600">${q.options[userOpt] || attemptNahi}</p>
                             </div>
                             ` : ''}
                         </div>
                         <div class="bg-blue-50 p-3 rounded-lg">
-                            <p class="font-semibold text-blue-700 mb-1"><i class="fas fa-lightbulb mr-2"></i>Explanation:</p>
+                            <p class="font-semibold text-blue-700 mb-1"><i class="fas fa-lightbulb mr-2"></i>${vyakhya}:</p>
                             <p class="text-gray-700 text-sm">${q.explanation}</p>
                         </div>
                     </div>
@@ -1015,7 +1180,6 @@
         }
         
         function restartTest() {
-            // Reset and restart with same questions
             userAnswers = new Array(currentQuestions.length).fill(null);
             questionStatus = new Array(currentQuestions.length).fill('not-visited');
             currentIndex = 0;
@@ -1034,11 +1198,6 @@
         function newTest() {
             location.reload();
         }
-        
-        // Auto-fill default URL on page load
-        window.onload = function() {
-            document.getElementById('sheetUrl').value = DEFAULT_SHEET_URL;
-        };
     </script>
 </body>
 </html>
